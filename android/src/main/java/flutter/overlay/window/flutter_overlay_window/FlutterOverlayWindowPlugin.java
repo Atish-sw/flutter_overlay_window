@@ -9,6 +9,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -96,6 +97,14 @@ public class FlutterOverlayWindowPlugin implements
             final Intent intent = new Intent(context, OverlayService.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                mActivity.setShowWhenLocked(true);
+                mActivity.setTurnScreenOn(true);
+            } else {
+                mActivity.getWindow().addFlags(
+                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                );
+            }
             context.startService(intent);
             result.success(null);
         } else if (call.method.equals("isOverlayActive")) {
