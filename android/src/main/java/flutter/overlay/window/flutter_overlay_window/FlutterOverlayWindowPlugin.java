@@ -1,6 +1,9 @@
 package flutter.overlay.window.flutter_overlay_window;
 
+import static android.content.Context.KEYGUARD_SERVICE;
+
 import android.app.Activity;
+import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
@@ -69,7 +72,14 @@ public class FlutterOverlayWindowPlugin implements
             } else {
                 result.success(true);
             }
-        } else if (call.method.equals("showOverlay")) {
+        } else if (call.method.equals("showOverlay") || call.method.equals("showOverlayWhenLocked")) {
+            if(call.method.equals("showOverlayWhenLocked")){
+                KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+                if (keyguardManager != null && keyguardManager.isKeyguardLocked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                }else{
+                    return;
+                }
+            }
             if (!checkOverlayPermission()) {
                 result.error("PERMISSION", "overlay permission is not enabled", null);
                 return;
