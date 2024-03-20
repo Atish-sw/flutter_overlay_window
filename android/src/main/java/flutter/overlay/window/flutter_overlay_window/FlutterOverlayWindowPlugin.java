@@ -12,6 +12,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
@@ -107,14 +108,6 @@ public class FlutterOverlayWindowPlugin implements
             final Intent intent = new Intent(context, OverlayService.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                mActivity.setShowWhenLocked(true);
-                mActivity.setTurnScreenOn(true);
-            } else {
-                mActivity.getWindow().addFlags(
-                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                );
-            }
             context.startService(intent);
             result.success(null);
         } else if (call.method.equals("isOverlayActive")) {
@@ -143,6 +136,7 @@ public class FlutterOverlayWindowPlugin implements
     @Override
     public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
         mActivity = binding.getActivity();
+        makeFlutterViewVisibleOnLockScreen(mActivity);
         FlutterEngineGroup enn = new FlutterEngineGroup(context);
         DartExecutor.DartEntrypoint dEntry = new DartExecutor.DartEntrypoint(
                 FlutterInjector.instance().flutterLoader().findAppBundlePath(),
@@ -159,6 +153,21 @@ public class FlutterOverlayWindowPlugin implements
     @Override
     public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
         this.mActivity = binding.getActivity();
+        makeFlutterViewVisibleOnLockScreen(mActivity);
+    }
+
+    private void makeFlutterViewVisibleOnLockScreen(Activity activity) {
+        if (activity != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                mActivity.setShowWhenLocked(true);
+                mActivity.setTurnScreenOn(true);
+            }else {
+                Window window = activity.getWindow();
+                window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                        WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+                        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }
+        }
     }
 
     @Override
