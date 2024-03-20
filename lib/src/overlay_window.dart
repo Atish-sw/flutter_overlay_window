@@ -54,6 +54,33 @@ class FlutterOverlayWindow {
     );
   }
 
+  static Future<void> showOverlayWhenLocked({
+    int height = WindowSize.fullCover,
+    int width = WindowSize.matchParent,
+    OverlayAlignment alignment = OverlayAlignment.center,
+    NotificationVisibility visibility = NotificationVisibility.visibilitySecret,
+    OverlayFlag flag = OverlayFlag.defaultFlag,
+    String overlayTitle = "overlay activated",
+    String? overlayContent,
+    bool enableDrag = false,
+    PositionGravity positionGravity = PositionGravity.none,
+  }) async {
+    await _channel.invokeMethod(
+      'showOverlayWhenLocked',
+      {
+        "height": height,
+        "width": width,
+        "alignment": alignment.name,
+        "flag": flag.name,
+        "overlayTitle": overlayTitle,
+        "overlayContent": overlayContent,
+        "enableDrag": enableDrag,
+        "notificationVisibility": visibility.name,
+        "positionGravity": positionGravity.name,
+      },
+    );
+  }
+
   /// Check if overlay permission is granted
   static Future<bool> isPermissionGranted() async {
     try {
